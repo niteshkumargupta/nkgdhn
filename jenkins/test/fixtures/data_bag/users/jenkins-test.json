@@ -1,0 +1,9 @@
+{
+  "id": "jenkins-test",
+  "uid": "10002",
+  "groups": ["sysadmin","jenkins-test"],
+  "shell": "/bin/bash",
+  "home_dir": "/home/jenkins-test",
+  "comment": "Jenkins Test Service Account",
+  "ssh_keys": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCuhrh9LJS1P82L8jVc8rG3Cbj4C68TkHeECnhuUMeXeQMR9abVH3xxwAH/WyuVgUHiG28H+YsAr4Gmc/lfdFInMBQLaOxFozMGEXeMHZQKpWrB7nQAhFc1ZcwVAtJd8qKOxDOZI4PpUTl7LmVl4y95KcklYUofP4EMnqoNmUI60OfwX24HdBJVrCMX/NVwmzqEVnbH6LoPekwaTi/nb0YV6epK1nGsjYGWYrmL0y+kyimDJWOlnDBCbwIgEzlxr3WL3+Hp/yHbqy24A95c8YBPPjbxGKeC6Sk0C2ruxET0/sU0a+QB/OA8XRnsrcnrOXDOGB3wsNG4SJYw89SSLqOh enarciso@Eugenes-MacBook-Pro.local"
+}

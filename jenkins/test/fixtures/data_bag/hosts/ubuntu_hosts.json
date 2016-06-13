@@ -1,0 +1,12 @@
+{
+  "id": "slave-ubuntu-1404",
+  "ip_address": "192.168.10.11",
+  "description": "Test Ubuntu Slave Node",
+  "labels": [ "Ubuntu", "Test" ],
+  "executors": 3,
+  "environment": {
+    "TEST_ENV": "/var/lib/jenkins",
+    "TEST_TMP": "/var/tmp"
+  },
+  "method": "ssh"
+}

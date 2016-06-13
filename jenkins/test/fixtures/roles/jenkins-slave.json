@@ -1,0 +1,12 @@
+{
+  "name": "jenkins-slave",
+  "description": "Test add slaves to master ",
+  "json_class": "Chef::Role",
+  "default_attributes": {},
+  "override_attributes": {},
+  "chef_type": "role",
+  "run_list": [
+    "recipe[didata-jenkins::slave]"
+  ],
+  "env_run_lists": {}
+}

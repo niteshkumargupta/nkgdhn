@@ -1,0 +1,32 @@
+{
+  "name": "base",
+  "description": "Test base role",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+    "didata-base": {
+      "groups": {
+        "sysadmin": 11000,
+        "users": 100
+      }
+    }
+    },
+  "override_attributes": {
+    "authorization": {
+      "sudo": {
+        "groups": ["sysadmin", "sudo"],
+        "passwordless": true,
+        "include_sudoers_d": true
+      }
+    },
+    "apt": {
+      "compile_time_update": true
+    }
+  },
+  "chef_type": "role",
+  "run_list": [
+    "recipe[didata-base::packages]",
+    "recipe[didata-base::users]",
+    "recipe[sudo]"
+  ],
+  "env_run_lists": {}
+}

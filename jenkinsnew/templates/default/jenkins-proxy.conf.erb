@@ -1,0 +1,29 @@
+<VirtualHost *:80>
+  ServerAdmin  <%= @node['didata-jenkins']['webmaster_email'] %>
+  Redirect permanent / https://<%= @node['fqdn'] %>/
+</VirtualHost>
+
+<VirtualHost *:443>
+  SSLEngine on
+  SSLProxyEngine on
+  SSLCertificateFile <%= @params[:certificate_file] %>
+  SSLCertificateKeyFile <%= @params[:private_file] %>
+  ServerAdmin  <%= @node['didata-jenkins']['webmaster_email'] %>
+  ProxyRequests     Off
+  ProxyPreserveHost On
+  AllowEncodedSlashes NoDecode
+  <Proxy *>
+      Order deny,allow
+      Allow from all
+  </Proxy>
+
+  LogLevel <%= @node['didata-jenkins']['loglevel'] %>
+  CustomLog <%= @node['didata-jenkins']['log_path'] %>/jenkins_access.log combined
+  ErrorLog <%= @node['didata-jenkins']['log_path'] %>/jenkins_error.log
+
+  ProxyPass         /  http://localhost:<%= @node['jenkins']['master']['port'] %>/ nocanon
+  ProxyPassReverse  /  http://localhost:<%= @node['jenkins']['master']['port'] %>/
+  ProxyPassReverse  /  http://<%= @node['fqdn'] %>/
+  RequestHeader set X-Forwarded-Proto "https"
+  RequestHeader set X-Forwarded-Port "443"
+</VirtualHost>
