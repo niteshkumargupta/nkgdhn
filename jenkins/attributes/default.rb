@@ -1,51 +1,54 @@
 #
-# Cookbook Name:: didata-jenkins
+# Cookbook Name:: jenkins
 # Attributes:: default
 #
-# Author:: Eugene Narciso <eugene.narciso@itaas.dimensiondata.com>
-# Copyright 2015, Dimension Data
+# Author: Doug MacEachern <dougm@vmware.com>
+# Author: Fletcher Nichol <fnichol@nichol.ca>
+# Author: Seth Chisamore <schisamo@chef.io>
+# Author: Seth Vargo <sethvargo@gmail.com>
 #
-# All rights reserved - Do Not Redistribute
+# Copyright 2010, VMware, Inc.
+# Copyright 2012-2014, Chef Software, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
-# Default values
-default['didata-jenkins']['pub_data_bag'] = 'users'
-default['didata-jenkins']['priv_data_bag'] = 'private_keys'
-default['didata-jenkins']['host_data_bag'] = 'hosts'
-default['didata-jenkins']['accounts'] = ['jenkins', 'jenkins-test']
-default['didata-jenkins']['plugins'] = [
-  'nuget',
-  'github-oauth',
-  'github',
-  'ghprb',
-  'github-api',
-  'slack',
-  'delivery-pipeline-plugin',
-  'chef'
-]
-
-# Jenkins Slaves attributes
-default['didata-jenkins']['slave_user_creds'] = 'jenkins-test'
-default['didata-jenkins']['slave_executor'] = 2
-
-# Default Apache2 parameters
-default['didata-jenkins']['webmaster_email'] = 'webmaster@example.com'
-default['didata-jenkins']['loglevel'] = 'info'
-
-# Default Apache2 paths and files are different between debian & rhel platform_family
-case node['platform_family']
-  when 'debian'
-    default['didata-jenkins']['log_path'] = '/var/log/apache2'
-    default['didata-jenkins']['ssl_path'] = '/etc/ssl'
-    default['didata-jenkins']['ssl']['cert_file'] = "#{node['didata-jenkins']['ssl_path']}/certs/ssl-cert-snakeoil.pem"
-    default['didata-jenkins']['ssl']['key_file'] = "#{node['didata-jenkins']['ssl_path']}/private/ssl-cert-snakeoil.key"
-  when 'rhel'
-    default['didata-jenkins']['log_path'] = '/var/log/httpd'
-    default['didata-jenkins']['ssl_path'] = '/etc/pki/tls'
-    default['didata-jenkins']['ssl']['cert_file'] = "#{node['didata-jenkins']['ssl_path']}/certs/localhost.crt"
-    default['didata-jenkins']['ssl']['key_file'] = "#{node['didata-jenkins']['ssl_path']}/private/localhost.key"
-end
-if ::File.exist?("#{node['didata-jenkins']['ssl_path']}/certs/#{node['fqdn']}.crt") & ::File.exist?("#{node['didata-jenkins']['ssl_path']}/private/#{node['fqdn']}.key")
-  default['didata-jenkins']['ssl']['cert_file'] = "#{node['didata-jenkins']['ssl_path']}/certs/#{node['fqdn']}.crt"
-  default['didata-jenkins']['ssl']['key_file'] = "#{node['didata-jenkins']['ssl_path']}/private/#{node['fqdn']}.key"
+default['jenkins'].tap do |jenkins|
+  #
+  # The path to the +java+ bin on disk. This attribute is intelligently
+  # calculated by assuming some sane defaults from community Java cookbooks:
+  #
+  #   - node['java']['java_home']
+  #   - node['java']['home']
+  #   - ENV['JAVA_HOME']
+  #
+  # These home's are then intelligently joined with +/bin/java+ for the full
+  # path to the Java binary. If no +$JAVA_HOME+ is detected, +'java'+ is used
+  # and it is assumed that the correct java binary exists in the +$PATH+.
+  #
+  # You can override this attribute by setting the full path manually:
+  #
+  #   node.set['jenkins']['java'] = '/my/custom/path/to/java6'
+  #
+  # Setting this value to +nil+ will break the Internet.
+  #
+  jenkins['java'] = if node['java'] && node['java']['java_home']
+                      File.join(node['java']['java_home'], 'bin', 'java')
+                    elsif node['java'] && node['java']['home']
+                      File.join(node['java']['home'], 'bin', 'java')
+                    elsif ENV['JAVA_HOME']
+                      File.join(ENV['JAVA_HOME'], 'bin', 'java')
+                    else
+                      'java'
+                    end
 end

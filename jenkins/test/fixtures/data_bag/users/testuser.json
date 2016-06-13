@@ -1,8 +1,0 @@
-{
-  "id": "testuser",
-  "uid": "10003",
-  "groups": ["sysadmin"],
-  "shell": "/bin/bash",
-  "home_dir": "/home/testuser",
-  "comment": "Test User"
-}
