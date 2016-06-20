@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-ant_pkgs = ['ant', 'ant-contrib', 'ivy']
+ant_pkgs = ['ant', 'ant-contrib']
 
 ant_pkgs.each do |pkg|
   package pkg do

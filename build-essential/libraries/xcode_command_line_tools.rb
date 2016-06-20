@@ -2,7 +2,7 @@
 # Cookbook Name:: build-essential
 # Library:: xcode_command_line_tools
 #
-# Copyright 2014-2016, Chef Software, Inc.
+# Copyright 2014, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,12 +29,10 @@ class Chef
     def initialize(name, run_context = nil)
       super
 
-      # => Break down SemVer
-      major, minor, _patch = node['platform_version'].split('.').map { |v| String(v) }
-      @provider = case [major, minor].join('.')
-                  when '10.7', '10.8'
+      @provider = case node['platform_version'].to_f
+                  when 10.7, 10.8
                     Provider::XcodeCommandLineToolsFromDmg
-                  when '10.9', '10.10', '10.11'
+                  when 10.9
                     Provider::XcodeCommandLineToolsFromSoftwareUpdate
                   else
                     Chef::Log.warn <<-EOH
@@ -44,7 +42,7 @@ from Software Update, but there is a high probability that it will fail...
 
 If you have tested and verified OSX #{node['platform_version']} and you are sick
 of seeing this warning in your Chef Client runs, please submit a Pull Request to
-https://github.com/chef-cookbooks/build-essential and add this version of OSX
+https://github.com/opscode-cookbooks/build-essential and add this version of OSX
 to provider list.
 EOH
                     Provider::XcodeCommandLineToolsFromSoftwareUpdate
@@ -133,10 +131,9 @@ class Chef
     # @return [void]
     #
     def download
-      remote_file = Resource::RemoteFile.new(dmg_cache_path, run_context)
-      remote_file.source(dmg_remote_source)
-      remote_file.backup(false)
-      remote_file.run_action(:create)
+      remote_file dmg_cache_path do
+        source dmg_remote_source
+      end
     end
 
     #
@@ -145,7 +142,7 @@ class Chef
     # @return [void]
     #
     def attach
-      execute %(hdiutil attach "#{dmg_cache_path}" -mountpoint "#{mount_path}")
+      execute %|hdiutil attach "#{dmg_cache_path}" -mountpoint "#{mount_path}"|
     end
 
     #
@@ -163,7 +160,7 @@ class Chef
     # @return [void]
     #
     def detach
-      execute %(hdiutil detach "#{mount_path}")
+      execute %|hdiutil detach "#{mount_path}"|
     end
   end
 end
@@ -176,18 +173,18 @@ class Chef
       else
         converge_by("Install #{new_resource}") do
           # This script was graciously borrowed and modified from Tim Sutton's
-          # osx-vm-templates at https://github.com/timsutton/osx-vm-templates/blob/b001475df54a9808d3d56d06e71b8fa3001fff42/scripts/xcode-cli-tools.sh
+          # osx-vm-templates at https://github.com/timsutton/osx-vm-templates/blob/b8c4d244/scripts/xcode-cli-tools.sh.
           execute 'install XCode Command Line tools' do
             command <<-EOH.gsub(/^ {14}/, '')
-              # create the placeholder file that's checked by CLI updates' .dist code
-              # in Apple's SUS catalog
+              # This file is checked by CLI updates
               touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-              # find the CLI Tools update
-              PROD=$(softwareupdate -l | grep "\*.*Command Line" | head -n 1 | awk -F"*" '{print $2}' | sed -e 's/^ *//' | tr -d '\n')
-              # install it
-              softwareupdate -i "$PROD" -v
+
+              # Find the update named "Developer"
+              PROD=$(softwareupdate -l | grep -B 1 "Developer" | head -n 1 | awk -F"*" '{print $2}')
+
+              # Install it
+              softwareupdate -i $PROD -v
             EOH
-            # rubocop:enable Metrics/LineLength
           end
         end
       end
